@@ -52,13 +52,7 @@ public class TreeService {
                         Collectors.mapping(CategoryDto::getChildrens, Collectors.toSet())));
     }
 
-//    public void deleteCategory(String categoryName) throws NotFoundException {
-//        CategoryDto categoryDto= treeRepository.findByName(categoryName)
-//                .orElseThrow(() -> new NotFoundException("Category not found: " + categoryName));
-//
-//
-//        treeRepository.delete(categoryDto);
-//    }
+
 public void deleteCategoryByName(String name) throws ChangeSetPersister.NotFoundException {
    CategoryDto categoryDto = (CategoryDto) treeRepository.findByName(name)
             .orElseThrow(ChangeSetPersister.NotFoundException::new);

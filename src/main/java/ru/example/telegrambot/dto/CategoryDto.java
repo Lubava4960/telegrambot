@@ -23,5 +23,5 @@ public class CategoryDto {
     private String name;
 
     @Column(name = "children")
-    private Set<String> childrens = new HashSet<>();
+    private Set <String> childrens = new HashSet<>();
 }

@@ -1,5 +1,6 @@
 package ru.example.telegrambot.service;
 
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import ru.example.telegrambot.repository.TreeRepository;
 
@@ -8,7 +9,7 @@ import java.util.regex.Pattern;
 
 import static ru.example.telegrambot.service.TreeService.ERROR_DONT_FIND;
 
-@Service
+@Component
 public class AddElement {
     private final TreeRepository treeRepository;
     final TreeService treeService;

@@ -4,6 +4,7 @@ import com.vdurmont.emoji.EmojiParser;
 
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -29,16 +30,18 @@ public class TelegramBotService  extends TelegramLongPollingBot {
     final MessageController messageController;
     final AddCategory addCategory;
     final AddElement addElement;
+    final RemoveTree removeTree;
     private final Pattern pattern = Pattern.compile("(([А-я\\d\\s.,!?:]+))");
 
 
-    public TelegramBotService(TelegramBotConfiguration telegramBotConfiguration, TreeService treeService, MessageController messageController, AddCategory addCategory, AddElement addElement) {
+    public TelegramBotService(TelegramBotConfiguration telegramBotConfiguration, TreeService treeService, MessageController messageController, AddCategory addCategory, AddElement addElement, RemoveTree removeTree) {
         this.telegramBotConfiguration = telegramBotConfiguration;
         this.treeService = treeService;
         this.messageController = messageController;
 
         this.addCategory = addCategory;
         this.addElement = addElement;
+        this.removeTree = removeTree;
     }
     @PostConstruct
     public void command(){
@@ -48,7 +51,7 @@ public class TelegramBotService  extends TelegramLongPollingBot {
         command.add(new BotCommand("/addCategory", "добавить категорию"));
         command.add(new BotCommand("/addElement", "добавить элемент"));
         command.add(new BotCommand("/treeView", "просмотр дерева категорий"));
-       // command.add(new BotCommand("/removeTree", "удаление дерева категорий"));
+        command.add(new BotCommand("/removeTree", "удаление дерева категорий"));
     }
 
     // обработка сообщений от пользователя
@@ -74,7 +77,7 @@ public class TelegramBotService  extends TelegramLongPollingBot {
 
                 case "/addCategory":
 
-                 //  sendMessage(chatId, "Введите категорию" );
+                   sendMessage(chatId, "Введите категорию" );
                     //перейти на метод
                     addCategory.addCategory(messageText);
 
@@ -83,7 +86,7 @@ public class TelegramBotService  extends TelegramLongPollingBot {
                     break;
 
                 case "/addElement":
-                    //sendMessage(chatId, "Введите элемент");
+                    sendMessage(chatId, "Введите элемент");
                      //  String text = matcher.group(1);
                       addElement.addElement(messageText,messageText);
                     sendMessage(chatId, "Ваш элемент успешно записан ");
@@ -95,29 +98,28 @@ public class TelegramBotService  extends TelegramLongPollingBot {
                     sendMessage(chatId, formatTreeView(treeView));
                     break;
 
-//                case "/removeTree":
-//                    sendMessage(chatId, "Введите категорию для удаления ");
-//
-//                    if (messageText != null) {
-//                        matcher = pattern.matcher(messageText);
-//                        if (matcher.find()) {
-//                            // Извлекаем данные из группы
-//                            String txt = matcher.group(1);         // Дальнейшая обработка
-//                        } else {          // Не найдено совпадений, обрабатываем ситуацию
-//                            throw new IllegalStateException("No match found");
-//                        }
-//
-//                        treeService.removeCategory(messageText);
-//                        sendMessage(chatId, "Ваша категория успешно удалена ");
-//
-//
-//                    }
-//
-//                    break;
+                case "/removeTree":
+                    sendMessage(chatId, "Введите категорию для удаления ");
 
+                    if (messageText != null) {
+                        matcher = pattern.matcher(messageText);
+                        if (matcher.find()) {
+                            // Извлекаем данные из группы
+                            String txt = matcher.group(1);         // Дальнейшая обработка
+                        } else {          // Не найдено совпадений, обрабатываем ситуацию
+                            throw new IllegalStateException("No match found");
+                        }
 
+                        try {
+                            removeTree.deleteCategoryByName(messageText);
+                        } catch (ChangeSetPersister.NotFoundException e) {
+                            throw new RuntimeException(e);
+                        }
+                        sendMessage(chatId, "Ваша категория успешно удалена ");
 
-                default:
+                    }
+
+                    break;
 
             }
 
@@ -145,8 +147,6 @@ public class TelegramBotService  extends TelegramLongPollingBot {
         sendMessage(chatId, answer);
 
     }
-
-
 
 
 
